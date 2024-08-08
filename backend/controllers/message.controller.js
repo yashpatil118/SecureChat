@@ -59,8 +59,7 @@ export const getMessage = async (req,res) => {
 
         const conversation = await Conversation.findOne({
             participants: {$all: [senderId,userToChatId]},
-        }).populate("message"); //not refrence but actual messages
-
+        }).populate("message"); 
         if(!conversation) return res.status(200).json([]);
 
         const message = conversation.message;
