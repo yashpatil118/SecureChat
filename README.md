@@ -112,8 +112,8 @@ CLIENT_URL=http://localhost:3000
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd secure-chat-app
+   git clone https://github.com/yashpatil118/SecureChat.git
+   cd SecureChat
    ```
 
 2. **Install dependencies**
