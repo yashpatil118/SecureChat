@@ -86,14 +86,11 @@ PORT=5000
 NODE_ENV=production
 
 # Database
-MONGO_DB_URI=mongodb+srv://username:password@cluster.mongodb.net/chatapp
+MONGO_DB_URI=<your mongodbcluster uri>
 
 # Security
 JWT_SECRET=your_super_secure_random_string_min_32_chars
-JWT_EXPIRES_IN=7d
 
-# Socket.io (Optional)
-CLIENT_URL=http://localhost:3000
 ```
 
 ### Security Notes for Environment Variables:
