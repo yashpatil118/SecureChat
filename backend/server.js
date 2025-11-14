@@ -2,6 +2,7 @@ import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import { csrf } from "lusca";
 
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
@@ -18,6 +19,7 @@ dotenv.config();
 
 app.use(express.json()); // to parse the incoming requests with JSON payloads (from req.body)
 app.use(cookieParser());
+app.use(csrf());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
