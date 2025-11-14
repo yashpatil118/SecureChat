@@ -1,19 +1,15 @@
+
 import { useState } from "react";
 import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
 
 const useSendMessage = () => {
-  const [loading, setLoading] = useState(false);
-  const { messages, setMessages, selectedConversation } = useConversation();
+	const [loading, setLoading] = useState(false);
+	const { messages, setMessages, selectedConversation } = useConversation();
 
-  const sendMessage = async (message) => {
-    if (!selectedConversation || !selectedConversation._id) {
-      toast.error("No conversation selected");
-      return;
-    }
-
-    setLoading(true);
-    try {
+	const sendMessage = async (message) => {
+		setLoading(true);
+		try {
       // fetch CSRF token (server returns { csrfToken })
       const tokenResp = await fetch("/api/csrf-token", {
         method: "GET",
@@ -38,28 +34,17 @@ const useSendMessage = () => {
         },
         body: JSON.stringify({ message }),
       });
+			const data = await res.json();
+			if (data.error) throw new Error(data.error);
 
-      const text = await res.text();
-      let data;
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error(text || "Failed to send message");
-      }
+			setMessages([...messages, data]);
+		} catch (error) {
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-      if (!res.ok || data.error) {
-        throw new Error(data.error || data.message || "Failed to send message");
-      }
-
-      setMessages((prev) => [...prev, data]);
-    } catch (error) {
-      toast.error(error.message || "Failed to send message");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { sendMessage, loading };
+	return { sendMessage, loading };
 };
-
 export default useSendMessage;
