@@ -21,8 +21,7 @@
     "mongoose": "^8.3.2",
     "socket.io": "^4.7.5",
     "zustand": "^4.5.2",
-    "express-rate-limit": "^8.2.1",
-    "lusca": "^1.7.0"
+    "express-rate-limit": "^8.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
