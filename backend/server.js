@@ -37,7 +37,7 @@ app.use("/api", (req, res, next) => {
 
 const csrfMiddleware = csurf({
   cookie: {
-    httpOnly: false,
+    httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
   },
