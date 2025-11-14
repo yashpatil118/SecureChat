@@ -1,6 +1,8 @@
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { useAuthContext } from "../context/AuthContext"
+import { getXSRFToken } from "../services/csrf"; 
+
 
 
 const useLogin = () => {
@@ -16,7 +18,11 @@ const useLogin = () => {
     try{
         const res = await fetch("/api/auth/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json"},
+            credentials: "include",
+            headers: { 
+                  "Content-Type": "application/json",
+                  "CSRF-Token": getXSRFToken(),  
+            },
             body: JSON.stringify({username ,password }),
           });
 
