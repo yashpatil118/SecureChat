@@ -9,6 +9,7 @@ const isValidUsername = (u) => {
 };
 
 const isValidFullName = (n) => typeof n === "string" && n.trim().length >= 3 && n.trim().length <= 100;
+
 const isValidPassword = (p) => typeof p === "string" && p.length >= 8;
 
 export const signup = async (req, res) => {
@@ -24,12 +25,8 @@ export const signup = async (req, res) => {
     }
 
     const sanitizedUsername = username.trim();
-
-    const user = await User.findOne({ username: sanitizedUsername }).lean().exec();
-
-    if (user) {
-      return res.status(400).json({ error: "Username already exists" });
-    }
+    const existing = await User.findOne({ username: sanitizedUsername }).lean().exec();
+    if (existing) return res.status(400).json({ error: "Username already exists" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -47,12 +44,17 @@ export const signup = async (req, res) => {
 
     await newUser.save();
 
-    generateTokenAndSetCookie(newUser._id, res, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    });
+    generateTokenAndSetCookie(newUser._id, res);
+
+    try {
+      const csrfToken = req.csrfToken();
+      res.cookie("XSRF-TOKEN", csrfToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+      });
+    } catch {}
 
     res.status(201).json({
       _id: newUser._id,
@@ -61,7 +63,6 @@ export const signup = async (req, res) => {
       profilePic: newUser.profilePic,
     });
   } catch (error) {
-    console.error("Error in signup controller", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -75,21 +76,24 @@ export const login = async (req, res) => {
     }
 
     const sanitizedUsername = username.trim();
-
     const user = await User.findOne({ username: sanitizedUsername }).exec();
 
     const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
-
     if (!user || !isPasswordCorrect) {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    generateTokenAndSetCookie(user._id, res, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    });
+    generateTokenAndSetCookie(user._id, res);
+
+    try {
+      const csrfToken = req.csrfToken();
+      res.cookie("XSRF-TOKEN", csrfToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+      });
+    } catch {}
 
     res.status(200).json({
       _id: user._id,
@@ -98,17 +102,26 @@ export const login = async (req, res) => {
       profilePic: user.profilePic,
     });
   } catch (error) {
-    console.error("Error in login controller", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 export const logout = (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0, httpOnly: true, sameSite: "lax" });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    res.clearCookie("XSRF-TOKEN", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.error("Error in logout controller", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
