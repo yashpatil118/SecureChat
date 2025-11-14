@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { useAuthContext } from "../context/AuthContext"
+import { getXSRFToken } from "../services/csrf"; 
+
 import toast from "react-hot-toast"
 
 const useLogout = () => {
@@ -11,7 +13,10 @@ const useLogout = () => {
     try{
         const res = await fetch("/api/auth/logout", {
             method: "POST",
-            headers: { "Content-Type": "application/json"},
+            credentials: "include",
+            headers: { "Content-Type": "application/json",
+                     "CSRF-Token": getXSRFToken(),
+                     },
         });
         const data = await res.json();
         if(data.error){
