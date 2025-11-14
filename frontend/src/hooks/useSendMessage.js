@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import useConversation from "../zustand/useConversation";
+import { getXSRFToken } from "../services/csrf"; 
+
 import toast from "react-hot-toast";
 
 const useSendMessage = () => {
@@ -12,8 +14,10 @@ const useSendMessage = () => {
 		try {
 			const res = await fetch(`/api/messages/send/${selectedConversation._id}`, {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
+					"CSRF-Token": getXSRFToken(),
 				},
 				body: JSON.stringify({ message }),
 			});
